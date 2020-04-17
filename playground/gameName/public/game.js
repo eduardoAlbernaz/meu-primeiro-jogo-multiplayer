@@ -34,17 +34,20 @@ export default function createGame() {
                 const playerId = command.playerId
                 const playerX = 'playerX' in command ? command.playerX : Math.floor(Math.random() * state.screen.width)
                 const playerY = 'playerY' in command ? command.playerY : Math.floor(Math.random() * state.screen.height)
+                const score = 0
 
                 state.players[playerId] = {
                     x: playerX,
-                    y: playerY
+                    y: playerY,
+                    score
                 }
 
                 notifyAll({
                     type: 'add-player',
                     playerId: playerId,
                     playerX: playerX,
-                    playerY: playerY
+                    playerY: playerY,
+                    score
                 })
             }
 
@@ -79,19 +82,21 @@ export default function createGame() {
 
             function removeFruit(command) {
                 const fruitId = command.fruitId
+                const score = command.score
 
                 delete state.fruits[fruitId]
 
                 notifyAll({
             type: 'remove-fruit',
             fruitId: fruitId,
+            score: score
         })
             }
 
             function movePlayer(command) {
                 notifyAll(command)
 
-                const accpetedMoves = {
+                const acceptedMoves = {
                     ArrowUp(player) {
                         if (player.y - 1 >= 0) {
                             player.y -= 1
@@ -117,7 +122,7 @@ export default function createGame() {
                 const keyPressed = command.keyPressed
                 const playerId = command.playerId
                 const player = state.players[playerId]
-                const moveFunction = accpetedMoves[keyPressed]
+                const moveFunction = acceptedMoves[keyPressed]
 
                 if (player && moveFunction) {
                     moveFunction(player)
@@ -133,7 +138,8 @@ export default function createGame() {
 
                             if (player.x === fruit.x && player.y === fruit.y) {
                                 console.log(`COLLISION between ${playerId} and ${fruitId}`)
-                                removeFruit({ fruitId: fruitId })
+                                player.score += 1
+                                removeFruit({ fruitId: fruitId, score: player.score })
                             }
                         }
                 }
